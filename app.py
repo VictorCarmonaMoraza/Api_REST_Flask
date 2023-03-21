@@ -7,7 +7,7 @@ print("Nombre aplicacion: ", __name__)
 #Declaracion de lista para almacenar los datos
 storesList = [
     {
-        "name":"Tienda 1",
+        "name":"Tienda_1",
         "items":[
             {
                 "name": "Silla",
@@ -38,3 +38,16 @@ def create_store():
         return new_store, 201
     except Exception as ex:
         print(f'Ocurrio un error {ex},{TypeError}')
+
+
+#Agregamos elementos a nuestra tienda
+@app.post("/store/<string:name>/item")
+def create_item(name):
+    request_data = request.get_json()
+    for store in storesList:
+        if store["name"] == name:
+            new_item = {"name":request_data["name"], "price":request_data["price"]}
+            store["items"].append(new_item)
+            return new_item, 201
+    return {"message":"Store not found"}, 404
+
