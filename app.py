@@ -1,74 +1,78 @@
+import uuid
 from flask import Flask, request
+from db import itemsList, storesList
 
 app = Flask(__name__)
 
 print("Nombre aplicacion: ", __name__)
 
-#Declaracion de lista para almacenar los datos
-storesList = [
-    {
-        "name":"Tienda_1",
-        "items":[
-            {
-                "name": "Silla",
-                "price": 15.99
-            }
-        ]
-    }
-]
 
+#region Store
 
 #Obtenemos todas las tiendas de la lista
 @app.get("/store")     #http://127.0.0.1:5000/store
 def get_stores():
-    return {"stores": storesList}
+    return {"stores": list(storesList.values())}
+
+
+#Obtener una tienda especifica y sus articulos
+@app.get("/store/<string:store_id>")
+def get_store(store_id):
+    try:
+        return storesList[store_id]
+    except KeyError:
+        return {"message": "Tienda no encontrada"}, 404
 
 
 #Creamos una tienda
 @app.post("/store")     #http://127.0.0.1:5000/store
 def create_store():
     try:
-        #Obtenemos el dato que nos ha enviado el cliente
-        request_data = request.get_json()
+        # Obtenemos el dato que nos ha enviado el cliente
+        store_data = request.get_json()
+        # Creamos el identificador universal
+        store_id = uuid.uid4().hex
         #Montamos la nueva tienda
-        new_store = {'name':request_data["name"], "items":[]}
+        new_store = {**store_data, "id": store_id}
         #Agregamos el nuevo elemento a la lista
-        storesList.append(new_store)
+        storesList[store_id] = new_store
         #Retornamos el nuevo elemento creado
         return new_store, 201
     except Exception as ex:
         print(f'Ocurrio un error {ex},{TypeError}')
 
+#endregion Store
+
+
+#region Articulos
+
+# Obtiene todos los articulos
+@app.get("/item")
+def get_all_items():
+    return {"items": list(itemsList.values())}
+
+
+# Obtiene un articulo por su id
+@app.get("/item/<string:item_id>")
+def get_item(item_id):
+    try:
+        return itemsList[item_id]
+    except:
+        return {"message": "Articulo no encontrado"}, 404
+
 
 #Agregamos elementos a nuestra tienda
-@app.post("/store/<string:name>/item")
+@app.post("/item")
 def create_item(name):
-    request_data = request.get_json()
-    for store in storesList:
-        if store["name"] == name:
-            new_item = {"name":request_data["name"], "price":request_data["price"]}
-            store["items"].append(new_item)
-            return new_item, 201
-    return {"message":"Store not found"}, 404
+    item_data = request.get_json()
+    if item_data["store_id"] not in storesList:
+        return {"message": "Tienda no encontrada"}, 404
+
+    item_id = uuid.uuid4().hex
+    item ={**item_data, "id": item_id}
+    itemsList[item_id] = item
+
+    return item, 201
 
 
-
-#Obtener una tienda especifica y sus articulos
-@app.get("/store/<string:name>")
-def get_store(name):
-    #Recorremos la lista
-    for store in storesList:
-        if store["name"] == name:
-            return store
-    return {"message": "Tienda no encontrada"}, 404
-
-
-#Obtener los articulos de una tienda
-@app.get("/store/<string:name>/item")
-def get_item_in_store(name):
-    #Recorremos las lista de tiendas
-    for store in storesList:
-        if store["name"] == name:
-            #Retornamos los articulos de la tienda
-            return {"items":store["items"]}
-    return {"message":"Tienda no encontrada"}, 404
+#endregion Articulos
