@@ -51,3 +51,24 @@ def create_item(name):
             return new_item, 201
     return {"message":"Store not found"}, 404
 
+
+
+#Obtener una tienda especifica y sus articulos
+@app.get("/store/<string:name>")
+def get_store(name):
+    #Recorremos la lista
+    for store in storesList:
+        if store["name"] == name:
+            return store
+    return {"message": "Tienda no encontrada"}, 404
+
+
+#Obtener los articulos de una tienda
+@app.get("/store/<string:name>/item")
+def get_item_in_store(name):
+    #Recorremos las lista de tiendas
+    for store in storesList:
+        if store["name"] == name:
+            #Retornamos los articulos de la tienda
+            return {"items":store["items"]}
+    return {"message":"Tienda no encontrada"}, 404
