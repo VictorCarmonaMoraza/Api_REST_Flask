@@ -55,6 +55,15 @@ def create_store():
     except Exception as ex:
         abort(404, message =f"{ex},{TypeError}")
 
+
+@app.delete("/store/<string:store_id>")
+def delete_store(store_id):
+    try:
+      del storesList[store_id]
+      return {"message":"Tienda Borrada"}
+    except KeyError:
+      abort(404, message="Tienda no encontrada")
+
 #endregion Store
 
 
@@ -107,4 +116,34 @@ def create_item():
     return item, 201
 
 
+# Borramos articulos de una tienda
+@app.delete("/item/<string:item_id>")
+def delete_item(item_id):
+    try:
+      del itemsList[item_id]
+      return {"message":"Articulo Borrado"}
+    except KeyError:
+      abort(404, message="Articulo no encontrado")
+
+
+
+# Modificamos articulos de una tienda
+@app.put("/item/<string:item_id>")
+def update_item(item_id):
+    item_data = request.get_json()
+    if "price" not in item_data or "name" not in item_data:
+        abort(
+            400,
+            message ="Bad Request. Ensure 'price', and 'name' are included in the JSON payload."
+        )
+    try:
+        item = itemsList[item_id]
+        item |=item_data
+
+        return item
+    except KeyError:
+        abort(
+            400,
+            message = "Articulo no encontrado"
+        )
 #endregion Articulos
