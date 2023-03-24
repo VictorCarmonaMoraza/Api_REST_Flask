@@ -5,7 +5,8 @@ from flask_smorest import abort
 
 app = Flask(__name__)
 
-print("Nombre aplicacion: ", __name__)
+# if __name__ == '__main__':
+#     app.run(debug=True)
 
 
 #region Store
@@ -73,6 +74,7 @@ def delete_store(store_id):
 @app.get("/item")
 def get_all_items():
     return {"items": list(itemsList.values())}
+
 
 
 # Obtiene un articulo por su id
@@ -146,4 +148,5 @@ def update_item(item_id):
             400,
             message = "Articulo no encontrado"
         )
+
 #endregion Articulos

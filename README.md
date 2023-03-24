@@ -1,2 +1,2 @@
 
-## Mejora general a nuestra primera API REST
+## Recragar imagen en docker
